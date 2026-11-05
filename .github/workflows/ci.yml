@@ -50,10 +50,13 @@ jobs:
         # Pest needs PHP 8.2; the 8.1 job below checks the SDK itself still parses there.
         php: ['8.2', '8.3', '8.4', '8.5']
         dependencies: [highest]
+        guzzle: [any]
         include:
           - php: '8.2'
             dependencies: lowest
-          # Highest resolves Guzzle 8 and lowest the oldest 7, so check the newest 7 too.
+            guzzle: any
+          # Highest resolves Guzzle 8 and lowest the oldest 7, so check the newest 7 too. Its
+          # own `guzzle` value makes it a job of its own, not a change to the 8.4 one.
           - php: '8.4'
             dependencies: highest
             guzzle: '^7.8.2'
@@ -66,14 +69,14 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: none
       - name: pin Guzzle
-        if: matrix.guzzle
+        if: matrix.guzzle != 'any'
         run: composer require "guzzlehttp/guzzle:${{ matrix.guzzle }}" --no-update --no-interaction
       - uses: ramsey/composer-install@v3
         with:
           dependency-versions: ${{ matrix.dependencies }}
       - run: composer test
       # The lint job analyses against Guzzle 8; this checks the Guzzle 7 paths too.
-      - if: matrix.guzzle
+      - if: matrix.guzzle != 'any'
         run: composer analyse
 
   php-8-1:
@@ -89,8 +92,12 @@ jobs:
           coverage: none
       - name: php -l
         run: find src -name '*.php' -print0 | xargs -0 -n1 php -l
+      # Composer resolves dev requirements even with --no-dev, and Pest needs PHP 8.2, so
+      # they're removed first: this job only checks the SDK installs and runs.
       - name: install without dev dependencies
-        run: composer update --no-dev --no-interaction --no-progress
+        run: |
+          php -r '$c = json_decode(file_get_contents("composer.json"), true); unset($c["require-dev"]); file_put_contents("composer.json", json_encode($c));'
+          composer update --no-dev --no-interaction --no-progress
       - name: smoke test
         run: |
           php -r 'require "vendor/autoload.php";
