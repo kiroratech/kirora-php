@@ -1,0 +1,65 @@
+{
+    "name": "kirora/kirora-php",
+    "description": "Kirora SDK for PHP.",
+    "keywords": ["php", "kirora", "sdk", "api", "client", "email", "marketing"],
+    "homepage": "https://kirora.io/docs/sdks/php",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kirora and contributors",
+            "homepage": "https://github.com/kiroratech/kirora-php/contributors"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/kiroratech/kirora-php/issues",
+        "docs": "https://kirora.io/docs/sdks/php",
+        "source": "https://github.com/kiroratech/kirora-php"
+    },
+    "require": {
+        "php": "^8.1",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^7.8.2 || ^8.0",
+        "guzzlehttp/psr7": "^2.6.3 || ^3.0",
+        "psr/http-client": "^1.0",
+        "psr/http-message": "^1.1 || ^2.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "pestphp/pest": "^2.36 || ^3.0",
+        "phpstan/phpstan": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Kirora\\": "src/"
+        },
+        "files": [
+            "src/Kirora.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "codegen": "@php scripts/codegen.php",
+        "codegen:check": "@php scripts/codegen.php --check",
+        "test": "pest",
+        "analyse": "phpstan analyse --memory-limit=1G",
+        "format": "php-cs-fixer fix",
+        "format:check": "php-cs-fixer fix --dry-run --diff"
+    },
+    "scripts-descriptions": {
+        "codegen": "Regenerate the models, error codes, webhook events and retry table from the pinned OpenAPI spec.",
+        "codegen:check": "Fail if any generated file is out of date with the pinned OpenAPI spec."
+    },
+    "config": {
+        "sort-packages": true,
+        "preferred-install": "dist",
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

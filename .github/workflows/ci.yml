@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+# A newer push to the same pull request makes an older run pointless. Runs on main all
+# finish, so every commit there gets a result.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # Checks whose result doesn't depend on the PHP version, so they run once.
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+      - run: composer validate --strict
+      - run: composer install --no-interaction --no-progress
+      - run: composer format:check
+      - run: composer analyse
+      - run: composer codegen:check
+      - run: composer audit --no-dev
+      # A release tag must match Kirora::VERSION, which the User-Agent reports.
+      - name: tag matches VERSION
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          version=$(sed -n "s/^    public const VERSION = '\(.*\)';$/\1/p" src/Kirora.php)
+          test "v$version" = "$GITHUB_REF_NAME" || (echo "tag $GITHUB_REF_NAME, but VERSION is $version" && exit 1)
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # Pest needs PHP 8.2; the 8.1 job below checks the SDK itself still parses there.
+        php: ['8.2', '8.3', '8.4', '8.5']
+        dependencies: [highest]
+        include:
+          - php: '8.2'
+            dependencies: lowest
+          # Highest resolves Guzzle 8 and lowest the oldest 7, so check the newest 7 too.
+          - php: '8.4'
+            dependencies: highest
+            guzzle: '^7.8.2'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - name: pin Guzzle
+        if: matrix.guzzle
+        run: composer require "guzzlehttp/guzzle:${{ matrix.guzzle }}" --no-update --no-interaction
+      - uses: ramsey/composer-install@v3
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+      - run: composer test
+      # The lint job analyses against Guzzle 8; this checks the Guzzle 7 paths too.
+      - if: matrix.guzzle
+        run: composer analyse
+
+  php-8-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+      - name: php -l
+        run: find src -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: install without dev dependencies
+        run: composer update --no-dev --no-interaction --no-progress
+      - name: smoke test
+        run: |
+          php -r 'require "vendor/autoload.php";
+            $client = Kirora::client("key");
+            assert($client->contacts instanceof Kirora\Service\Contacts);
+            echo Kirora\UserToken::create("secret", "user"), PHP_EOL;'
