@@ -18,8 +18,11 @@ use Kirora\Resource;
  * @property-read string $createdAt
  * @property-read string|null $sendAt When a timed message goes out; null when it went at once.
  * @property-read string|null $fallbackFor With `fallbackOrder`: the message this one stands in for. It waits as `queued` until that one ends: sent when it failed, was skipped or bounced, else skipped with reason `fallback_not_needed`. Null otherwise.
+ * @property-read MessageCopy|null $copy Set on a `cc` or `bcc` copy; null on the message itself.
  */
 class TransactionalMessage extends Resource
 {
-    protected const CASTS = [];
+    protected const CASTS = [
+        'copy' => MessageCopy::class,
+    ];
 }

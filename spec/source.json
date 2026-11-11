@@ -1,6 +1,6 @@
 {
   "description": "The OpenAPI spec `composer codegen` generates from: a commit of github.com/kiroratech/openapi. Codegen fails if the download doesn't match `version` and `sha256`, so update all three together.",
-  "url": "https://raw.githubusercontent.com/kiroratech/openapi/1303c76f2f7bd11044ba33cabee638192f3dff08/openapi.json",
+  "url": "https://raw.githubusercontent.com/kiroratech/openapi/dd83858ec02055d3f875ceed4959adb95bf94f47/openapi.json",
   "version": "1.0.0",
-  "sha256": "7125d2ab2cbaeb8d9978553e86daa373b89f696cfe2a021c0c9777bd5b63f3c9"
+  "sha256": "2e834a7c17f32a3861471c6fc3e3427f3c8c9d9a24b133cca0b57af6695f2c03"
 }

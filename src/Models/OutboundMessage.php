@@ -18,6 +18,7 @@ use Kirora\Resource;
  * @property-read array<string, mixed>|null $campaign The campaign it came from; null for any other message.
  * @property-read array<string, mixed>|null $journey The journey it came from, deleted or not; null for any other message.
  * @property-read array<string, mixed>|null $template The stored template and published version it was sent from; null for inline content.
+ * @property-read MessageCopy|null $copy Set on a `cc` or `bcc` copy; null on the message itself.
  * @property-read array<string, mixed>|null $contact Who it was for; null when the contact was deleted, or the message passed the retention period: it no longer names anyone.
  * @property-read string|null $recipientEmail The email address the message went to, frozen at the first attempt; null until then, and for push.
  * @property-read bool $simulated Sent to a reserved test address (`example.com` and the like): it passed every check a real send does but was never handed to the provider. Any outcome was simulated from the address, as `bounce@example.com` simulates a bounce.
@@ -37,5 +38,7 @@ use Kirora\Resource;
  */
 class OutboundMessage extends Resource
 {
-    protected const CASTS = [];
+    protected const CASTS = [
+        'copy' => MessageCopy::class,
+    ];
 }

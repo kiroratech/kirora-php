@@ -21,6 +21,7 @@ use Kirora\Resource;
  * @property-read string|null $country ISO 3166-1 alpha-2 code: as written, or inferred from the phone, else the timezone.
  * @property-read string|null $locale BCP 47 tag (`fr`, `fr-CA`): the language the contact reads (its first subtag), and how merge tags format numbers, dates and money for them.
  * @property-read ContactRfm|null $rfm The contact's RFM (recency, frequency and monetary value) group among the workspace's customers, from its purchase events (the workspace's `purchaseEvent`: an order, a paid invoice, a booking, a donation), each score from 1 to 5 (a fifth of the customers each; 5 is the most recent, most frequent or highest spend), and their purchase totals. Spend counts only purchases in the workspace's main currency; when the purchase carries no amount, `monetary` follows frequency. Recomputed daily, so a purchase today shows tomorrow; `null` for someone who has never purchased.
+ * @property-read ContactPurchaseCycle|null $purchaseCycle The contact's purchase cycle from the workspace's purchase event, worked out daily; null for someone who never purchased, and on plans that do not include Kiro.
  * @property-read array<string, string> $dates Named calendar dates, e.g. `birthday`, as `YYYY-MM-DD` or `--MM-DD`.
  * @property-read array<string, mixed> $attributes Custom attributes, keyed by attribute name.
  * @property-read ContactConsent $consent Consent on each channel.
@@ -33,6 +34,7 @@ class ContactDetail extends Resource
 {
     protected const CASTS = [
         'rfm' => ContactRfm::class,
+        'purchaseCycle' => ContactPurchaseCycle::class,
         'consent' => ContactConsent::class,
     ];
 }

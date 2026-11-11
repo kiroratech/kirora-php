@@ -245,10 +245,11 @@ PHP;
  */
 function objectPaths(array $spec, mixed $schema, string $prefix, array $seen, array &$out): void
 {
-    if (! is_array($schema) || count($seen) > 8) {
+    if (! is_array($schema)) {
         return;
     }
     if (isset($schema['$ref'])) {
+        // Stops at a schema already on this path, so a recursive one ends, at any depth.
         if (in_array($schema['$ref'], $seen, true)) {
             return;
         }
@@ -533,7 +534,7 @@ final class Models
             if (! preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $name)) {
                 continue;
             }
-            $description = summary(resolve($this->spec, $property)['description'] ?? $property['description'] ?? null);
+            $description = summary($this->description($property));
             $lines[] = rtrim(" * @property-read $type \$$name $description");
         }
         $description = summary($schema['description'] ?? $schema['title'] ?? null) ?: "The {$class} object.";
@@ -563,6 +564,33 @@ class $class extends Resource
 }
 
 PHP;
+    }
+
+    /**
+     * A property's description, else that of the one schema it can be besides null, so
+     * `anyOf: [{$ref: X}, {type: null}]` is described by X.
+     */
+    private function description(mixed $property): ?string
+    {
+        $own = resolve($this->spec, $property);
+        if (! is_array($own)) {
+            return null;
+        }
+        $description = $own['description'] ?? (is_array($property) ? ($property['description'] ?? null) : null);
+        if ($description !== null) {
+            return $description;
+        }
+        foreach (['anyOf', 'oneOf'] as $keyword) {
+            $nonNull = array_values(array_filter(
+                $own[$keyword] ?? [],
+                fn ($m) => ! (is_array($m) && ($m['type'] ?? null) === 'null'),
+            ));
+            if (count($nonNull) === 1) {
+                return resolve($this->spec, $nonNull[0])['description'] ?? null;
+            }
+        }
+
+        return null;
     }
 
     /**

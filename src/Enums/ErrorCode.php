@@ -42,6 +42,7 @@ enum ErrorCode: string
     case NothingToExport = 'NOTHING_TO_EXPORT';
     case EventNameLimitReached = 'EVENT_NAME_LIMIT_REACHED';
     case PlanLimitReached = 'PLAN_LIMIT_REACHED';
+    case SendingReviewRequired = 'SENDING_REVIEW_REQUIRED';
     case PlanFeatureUnavailable = 'PLAN_FEATURE_UNAVAILABLE';
     case CampaignAudienceConflict = 'CAMPAIGN_AUDIENCE_CONFLICT';
     case EmptyAudience = 'EMPTY_AUDIENCE';

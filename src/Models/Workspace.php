@@ -20,6 +20,9 @@ use Kirora\Resource;
  * @property-read string|null $suspendedAt When it was suspended; null if not.
  * @property-read string|null $deletionRequestedAt When deletion was asked for; null if not.
  * @property-read string|null $deletesAt When the workspace and everything in it is deleted for good, unless the deletion is cancelled before; null if no deletion is pending.
+ * @property-read string|null $website The business's website.
+ * @property-read string|null $mailKind What the workspace sends.
+ * @property-read string|null $contactOptIn How its contacts agreed to hear from it: a signup form, checkout, an app.
  * @property-read string $createdAt
  */
 class Workspace extends Resource

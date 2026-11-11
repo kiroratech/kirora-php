@@ -13,11 +13,13 @@ use Kirora\Resource;
  *
  * @property-read list<TransactionalMessage> $messages
  * @property-read list<TransactionalSkippedChannel> $skippedChannels Channels given that were not sent, each with the reason: the contact cannot receive it, or the plan has no room for it.
+ * @property-read list<TransactionalSkippedCopy> $skippedCopies `cc` or `bcc` addresses that got no copy, each with the reason.
  */
 class TransactionalSendResult extends Resource
 {
     protected const CASTS = [
         'messages' => ['list' => TransactionalMessage::class],
         'skippedChannels' => ['list' => TransactionalSkippedChannel::class],
+        'skippedCopies' => ['list' => TransactionalSkippedCopy::class],
     ];
 }

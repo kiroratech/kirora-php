@@ -336,6 +336,20 @@ it('sends an empty array as {} where the spec says the field is an object', func
         ->and((string) $api->request(2)->getBody())->toBe('{"attributes":{},"firstName":"Ada"}');
 });
 
+it('sends an empty array as {} in nested rules too', function () {
+    $api = fakeApi([data(['id' => 's1'], 201)]);
+    $api->client->segments->create(['name' => 's', 'rules' => ['all' => [['any' => [['within' => [], 'values' => []]]]]]]);
+
+    expect((string) $api->request()->getBody())->toBe('{"name":"s","rules":{"all":[{"any":[{"within":{},"values":[]}]}]}}');
+});
+
+it('knows the object fields of conditions however deep the spec nests them', function () {
+    // An A/B test version's template block nests its conditions deepest of all.
+    $objects = Kirora\Operations::ALL['POST /v1/campaigns']['objects'];
+    expect($objects)->toContain('abTest.versions.*.email.templateSnapshot.blocks.*.visibleIf.any.*.any.*.within')
+        ->and($objects)->toContain('content.email.templateSnapshot.blocks.*.visibleIf.all.*.all.*.within');
+});
+
 it('keeps the query string of a path as written, and pages through it', function () {
     $api = fakeApi([page([['id' => 'a']], 'p2'), page([['id' => 'b']])]);
     $items = iterator_to_array($api->client->requestAll('/v1/attributes/k/values?limit=50&filter.status=sent&tag=a&tag=b&f[x]=1'), false);

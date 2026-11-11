@@ -168,6 +168,15 @@ foreach ($sent->skippedChannels as $skipped) {
 }
 ```
 
+Likewise, a `cc` or `bcc` address can get no copy, for example when it's suppressed.
+Inspect `skippedCopies`:
+
+```php
+foreach ($sent->skippedCopies as $skipped) {
+    echo $skipped->kind, ' ', $skipped->email, ': ', $skipped->code, "\n";
+}
+```
+
 `contacts->identifyBatch()`, `events->trackBatch()` and `transactional->sendBatch()` accept
 up to 100 entries. A successful call can contain failed entries: inspect each entry in
 `$batch->results` for an `error`. For event and transactional batches, keys belong to
